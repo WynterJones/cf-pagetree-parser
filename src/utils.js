@@ -273,7 +273,7 @@ export function extractTextContent(element) {
 /**
  * Parse HTML content to ContentEditableNode children
  * @param {string} html - The HTML content to parse
- * @param {string|null} defaultLinkColor - Default color for links (from styleguide or data attribute)
+ * @param {string|null} defaultLinkColor - Default color for links (from data attribute)
  */
 export function parseHtmlToTextNodes(html, defaultLinkColor = null) {
   const temp = document.createElement('div');

@@ -44,8 +44,6 @@ export function parseCheckoutPlaceholder(element, parentId, index) {
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
       style: {
-        '--container-font-family': 'var(--style-guide-font-family-content)',
-        '--input-headline-font-family': 'var(--style-guide-font-family-subheadline)',
         '--multiple-payments-font-family': 'sans-serif',
         '--input-background-color': '#FFFFFF',
       },

@@ -166,7 +166,6 @@ export function parseBulletList(element, parentId, index) {
     selectors: {
       '.elBulletList': {
         attrs: {
-          'data-style-guide-content': 'm',
           'data-skip-text-shadow-settings': 'true',
           style: {
             color: textColor,

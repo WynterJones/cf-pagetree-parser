@@ -17,10 +17,10 @@ import { parsePageTree, exportPageTreeJSON } from 'cf-pagetree-parser';
 
 // Parse a DOM element to PageTree
 const rootElement = document.querySelector('[data-type="ContentNode"]');
-const pageTree = parsePageTree(rootElement, styleguideData);
+const pageTree = parsePageTree(rootElement);
 
 // Export as JSON string
-const json = exportPageTreeJSON(rootElement, true, styleguideData);
+const json = exportPageTreeJSON(rootElement, true);
 ```
 
 ### Browser (Standalone Bundle)
@@ -41,12 +41,12 @@ The `dist/cf-pagetree-parser.js` bundle can be used in sandboxed extension conte
 
 ### Main Functions
 
-- `parsePageTree(rootElement, styleguideData?)` - Parse DOM to PageTree object
-- `parseElement(element, parentId, index, styleguideData?)` - Parse single element
-- `extractPageSettings(rootElement, styleguideData?)` - Extract page settings
-- `exportPageTreeJSON(rootElement, formatted?, styleguideData?)` - Export as JSON string
-- `downloadPageTreeJSON(rootElement, filename?, styleguideData?)` - Download JSON file
-- `copyPageTreeToClipboard(rootElement, styleguideData?)` - Copy to clipboard
+- `parsePageTree(rootElement)` - Parse DOM to PageTree object
+- `parseElement(element, parentId, index)` - Parse single element
+- `extractPageSettings(rootElement)` - Extract page settings
+- `exportPageTreeJSON(rootElement, formatted?)` - Export as JSON string
+- `downloadPageTreeJSON(rootElement, filename?)` - Download JSON file
+- `copyPageTreeToClipboard(rootElement)` - Copy to clipboard
 
 ### Utilities
 

@@ -321,7 +321,6 @@ export function parsePageTree(rootElement = null) {
         ".containerModal": {
           attrs: {
             "data-skip-corners-settings": "false",
-            "data-style-guide-corner": "style1",
             style: { "margin-bottom": 0 },
           },
         },

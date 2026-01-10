@@ -145,7 +145,6 @@ export function parseButton(element, parentId, index) {
       '--style-padding-horizontal--unit': paddingHorizontal ? paddingHorizontal.unit : 'px',
       '--style-padding-vertical': paddingVertical ? paddingVertical.value : 16,
       '--style-padding-vertical--unit': paddingVertical ? paddingVertical.unit : 'px',
-      'style-guide-override-button': true,
       '--style-background-color': bgColor,
       '--style-border-color': borderColor || 'transparent',
       '--style-border-width': borderWidth ? borderWidth.value : 0,

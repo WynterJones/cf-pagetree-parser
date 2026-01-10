@@ -280,7 +280,7 @@ function extractTextContent(element) {
 /**
  * Parse HTML content to ContentEditableNode children
  * @param {string} html - The HTML content to parse
- * @param {string|null} defaultLinkColor - Default color for links (from styleguide or data attribute)
+ * @param {string|null} defaultLinkColor - Default color for links (from data attribute)
  */
 function parseHtmlToTextNodes(html, defaultLinkColor = null) {
   const temp = document.createElement('div');
@@ -1616,8 +1616,7 @@ function parseTextElement(
   parentId,
   index,
   type,
-  selector,
-  _styleGuideAttr
+  selector
 ) {
   const id = generateId();
   const contentEditableId = generateId();
@@ -1706,14 +1705,6 @@ function parseTextElement(
     selectorStyle["font-family"] = fontFamily;
   }
 
-  // Determine the style-guide-override param name based on type
-  const styleGuideOverrideMap = {
-    "Headline/V1": "style-guide-override-headline",
-    "SubHeadline/V1": "style-guide-override-subheadline",
-    "Paragraph/V1": "style-guide-override-content",
-  };
-  const styleGuideOverrideParam = styleGuideOverrideMap[type];
-
   // Parse animation attributes
   const { attrs: animationAttrs, params: animationParams } = parseAnimationAttrs(element);
 
@@ -1740,7 +1731,6 @@ function parseTextElement(
           style: selectorStyle,
         },
         params: {
-          [styleGuideOverrideParam]: true,
           "font-size--unit": fontSize ? fontSize.unit : "px",
           "line-height--unit": "%",
           "letter-spacing--unit": "rem",
@@ -1823,8 +1813,7 @@ function parseHeadline(element, parentId, index) {
     parentId,
     index,
     "Headline/V1",
-    ".elHeadline",
-    "data-style-guide-headline"
+    ".elHeadline"
   );
 }
 
@@ -1837,8 +1826,7 @@ function parseSubHeadline(element, parentId, index) {
     parentId,
     index,
     "SubHeadline/V1",
-    ".elSubheadline",
-    "data-style-guide-subheadline"
+    ".elSubheadline"
   );
 }
 
@@ -1851,8 +1839,7 @@ function parseParagraph(element, parentId, index) {
     parentId,
     index,
     "Paragraph/V1",
-    ".elParagraph",
-    "data-style-guide-content"
+    ".elParagraph"
   );
 }
 
@@ -1985,7 +1972,6 @@ function parseButton(element, parentId, index) {
       '--style-padding-horizontal--unit': paddingHorizontal ? paddingHorizontal.unit : 'px',
       '--style-padding-vertical': paddingVertical ? paddingVertical.value : 16,
       '--style-padding-vertical--unit': paddingVertical ? paddingVertical.unit : 'px',
-      'style-guide-override-button': true,
       '--style-background-color': bgColor,
       '--style-border-color': borderColor || 'transparent',
       '--style-border-width': borderWidth ? borderWidth.value : 0,
@@ -3314,7 +3300,6 @@ function parseBulletList(element, parentId, index) {
     selectors: {
       '.elBulletList': {
         attrs: {
-          'data-style-guide-content': 'm',
           'data-skip-text-shadow-settings': 'true',
           style: {
             color: textColor,
@@ -4136,8 +4121,6 @@ function parseCheckoutPlaceholder(element, parentId, index) {
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
       style: {
-        '--container-font-family': 'var(--style-guide-font-family-content)',
-        '--input-headline-font-family': 'var(--style-guide-font-family-subheadline)',
         '--multiple-payments-font-family': 'sans-serif',
         '--input-background-color': '#FFFFFF',
       },
@@ -4579,7 +4562,6 @@ function parsePageTree(rootElement = null) {
         ".containerModal": {
           attrs: {
             "data-skip-corners-settings": "false",
-            "data-style-guide-corner": "style1",
             style: { "margin-bottom": 0 },
           },
         },

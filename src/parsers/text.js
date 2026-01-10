@@ -37,8 +37,7 @@ function parseTextElement(
   parentId,
   index,
   type,
-  selector,
-  _styleGuideAttr
+  selector
 ) {
   const id = generateId();
   const contentEditableId = generateId();
@@ -127,14 +126,6 @@ function parseTextElement(
     selectorStyle["font-family"] = fontFamily;
   }
 
-  // Determine the style-guide-override param name based on type
-  const styleGuideOverrideMap = {
-    "Headline/V1": "style-guide-override-headline",
-    "SubHeadline/V1": "style-guide-override-subheadline",
-    "Paragraph/V1": "style-guide-override-content",
-  };
-  const styleGuideOverrideParam = styleGuideOverrideMap[type];
-
   // Parse animation attributes
   const { attrs: animationAttrs, params: animationParams } = parseAnimationAttrs(element);
 
@@ -161,7 +152,6 @@ function parseTextElement(
           style: selectorStyle,
         },
         params: {
-          [styleGuideOverrideParam]: true,
           "font-size--unit": fontSize ? fontSize.unit : "px",
           "line-height--unit": "%",
           "letter-spacing--unit": "rem",
@@ -244,8 +234,7 @@ export function parseHeadline(element, parentId, index) {
     parentId,
     index,
     "Headline/V1",
-    ".elHeadline",
-    "data-style-guide-headline"
+    ".elHeadline"
   );
 }
 
@@ -258,8 +247,7 @@ export function parseSubHeadline(element, parentId, index) {
     parentId,
     index,
     "SubHeadline/V1",
-    ".elSubheadline",
-    "data-style-guide-subheadline"
+    ".elSubheadline"
   );
 }
 
@@ -272,7 +260,6 @@ export function parseParagraph(element, parentId, index) {
     parentId,
     index,
     "Paragraph/V1",
-    ".elParagraph",
-    "data-style-guide-content"
+    ".elParagraph"
   );
 }
