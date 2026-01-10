@@ -922,7 +922,6 @@ function parseSectionContainer(element, parentId, index, parseChildren) {
     marginTop: spacing.marginTop || parseValueWithUnit('0px'),
   };
   const overlay = element.getAttribute('data-overlay');
-  const paintColors = element.getAttribute('data-paint-colors');
 
   // Video background attributes
   const videoBgUrl = element.getAttribute('data-video-bg-url');
@@ -964,11 +963,6 @@ function parseSectionContainer(element, parentId, index, parseChildren) {
   // Add custom element ID for scroll-to/show-hide targeting
   if (elementId) {
     node.attrs.id = elementId;
-  }
-
-  // Add paint colors if present
-  if (paintColors) {
-    node.attrs['data-paint-colors'] = paintColors;
   }
 
   // Apply spacing
@@ -1099,7 +1093,6 @@ function parseRowContainer(element, parentId, index, parseChildren) {
     marginTop: spacing.marginTop || parseValueWithUnit('0px'),
   };
   const overlay = element.getAttribute('data-overlay');
-  const paintColors = element.getAttribute('data-paint-colors');
 
   const width = parseValueWithUnit(styles.width || '1170px');
 
@@ -1152,11 +1145,6 @@ function parseRowContainer(element, parentId, index, parseChildren) {
   // Add custom element ID for scroll-to/show-hide targeting
   if (elementId) {
     node.attrs.id = elementId;
-  }
-
-  // Add paint colors if present
-  if (paintColors) {
-    node.attrs['data-paint-colors'] = paintColors;
   }
 
   // Add className if set
@@ -1302,7 +1290,6 @@ function parseColContainer(element, parentId, index, parseChildren) {
     const overlay = colInner.getAttribute('data-overlay');
     const separateCorners = colInner.getAttribute('data-separate-corners') === 'true';
     const borderRadius = parseBorderRadius(innerStyles);
-    const paintColors = colInner.getAttribute('data-paint-colors');
 
     const colInnerSelector = node.selectors['& > .col-inner'];
 
@@ -1418,11 +1405,6 @@ function parseColContainer(element, parentId, index, parseChildren) {
     colInnerSelector.attrs['data-skip-background-settings'] =
       (hasBackground || overlay) ? 'false' : 'true';
 
-    // Add paint colors if present
-    if (paintColors) {
-      colInnerSelector.attrs['data-paint-colors'] = paintColors;
-    }
-
     // Parse children from col-inner, skipping overlay and content wrapper
     let childIdx = 0;
     const parseColInnerChildren = (container) => {
@@ -1482,7 +1464,6 @@ function parseFlexContainer(element, parentId, index, parseChildren) {
     marginTop: spacing.marginTop || parseValueWithUnit('0px'),
   };
   const overlay = element.getAttribute('data-overlay');
-  const paintColors = element.getAttribute('data-paint-colors');
 
   const width = parseValueWithUnit(styles.width || '100%', '%');
   const height = styles.height ? parseValueWithUnit(styles.height, 'px') : null;
@@ -1522,11 +1503,6 @@ function parseFlexContainer(element, parentId, index, parseChildren) {
   // Add custom element ID for scroll-to/show-hide targeting
   if (elementId) {
     node.attrs.id = elementId;
-  }
-
-  // Add paint colors if present
-  if (paintColors) {
-    node.attrs['data-paint-colors'] = paintColors;
   }
 
   // Add width
@@ -1898,9 +1874,8 @@ function parseParagraph(element, parentId, index) {
  * @param {HTMLElement} element - The button element
  * @param {string} parentId - Parent element ID
  * @param {number} index - Child index
- * @param {Object} styleguideData - Optional styleguide data for looking up button styles
  */
-function parseButton(element, parentId, index, styleguideData = null) {
+function parseButton(element, parentId, index) {
   const id = generateId();
   const mainTextId = generateId();
   const subTextId = generateId();
@@ -1917,15 +1892,6 @@ function parseButton(element, parentId, index, styleguideData = null) {
   const hideIds = element.getAttribute('data-hide-ids');
   const elButtonType = element.getAttribute('data-elbuttontype');
 
-  // Check for styleguide button
-  const styleGuideButton = element.getAttribute('data-style-guide-button');
-
-  // Look up button style from styleguide if available
-  let styleguideButtonStyle = null;
-  if (styleGuideButton && styleguideData?.buttons) {
-    styleguideButtonStyle = styleguideData.buttons.find(btn => btn.id === styleGuideButton);
-  }
-
   // Find the anchor element for fallback parsing
   const anchor = element.querySelector('a');
   const anchorStyles = anchor ? parseInlineStyle(anchor.getAttribute('style') || '') : {};
@@ -1934,21 +1900,16 @@ function parseButton(element, parentId, index, styleguideData = null) {
   const textSpan = anchor ? anchor.querySelector('span') : null;
   const textStyles = textSpan ? parseInlineStyle(textSpan.getAttribute('style') || '') : {};
 
-  // Read from styleguide button style first, then data attributes, then inline styles
-  // Styleguide button structure: { regular: { bg, color }, hover: { bg, color }, borderRadius, borderWidth, borderColor }
+  // Read from data attributes first, then inline styles
   const bgAttr = element.getAttribute('data-bg');
-  const bgColor = styleguideButtonStyle?.regular?.bg
-    ? normalizeColor(styleguideButtonStyle.regular.bg)
-    : bgAttr
-      ? normalizeColor(bgAttr)
-      : (normalizeColor(anchorStyles['background-color']) || '#3b82f6');
+  const bgColor = bgAttr
+    ? normalizeColor(bgAttr)
+    : (normalizeColor(anchorStyles['background-color']) || '#3b82f6');
 
   const textColorAttr = element.getAttribute('data-color');
-  const textColor = styleguideButtonStyle?.regular?.color
-    ? normalizeColor(styleguideButtonStyle.regular.color)
-    : textColorAttr
-      ? normalizeColor(textColorAttr)
-      : (normalizeColor(textStyles.color) || '#ffffff');
+  const textColor = textColorAttr
+    ? normalizeColor(textColorAttr)
+    : (normalizeColor(textStyles.color) || '#ffffff');
 
   // Font styling - prefer data attributes
   const fontSizeAttr = element.getAttribute('data-size');
@@ -1962,39 +1923,25 @@ function parseButton(element, parentId, index, styleguideData = null) {
   const paddingHorizontal = pxAttr ? parseValueWithUnit(pxAttr) : parseValueWithUnit(anchorStyles['padding-right'] || '32px');
   const paddingVertical = pyAttr ? parseValueWithUnit(pyAttr) : parseValueWithUnit(anchorStyles['padding-top'] || '16px');
 
-  // Border and corners - styleguide first, then data attributes
+  // Border and corners - data attributes first, then inline styles
   const roundedAttr = element.getAttribute('data-rounded');
-  const borderRadius = styleguideButtonStyle?.borderRadius != null
-    ? { value: styleguideButtonStyle.borderRadius, unit: 'px' }
-    : roundedAttr
-      ? parseValueWithUnit(roundedAttr)
-      : parseBorderRadius(anchorStyles);
+  const borderRadius = roundedAttr
+    ? parseValueWithUnit(roundedAttr)
+    : parseBorderRadius(anchorStyles);
 
   const borderColorAttr = element.getAttribute('data-border-color');
-  const borderColor = styleguideButtonStyle?.borderColor
-    ? normalizeColor(styleguideButtonStyle.borderColor)
-    : borderColorAttr
-      ? normalizeColor(borderColorAttr)
-      : normalizeColor(anchorStyles['border-color']);
+  const borderColor = borderColorAttr
+    ? normalizeColor(borderColorAttr)
+    : normalizeColor(anchorStyles['border-color']);
 
   const borderWidthAttr = element.getAttribute('data-border-width');
-  const borderWidth = styleguideButtonStyle?.borderWidth != null
-    ? { value: styleguideButtonStyle.borderWidth, unit: 'px' }
-    : borderWidthAttr
-      ? parseValueWithUnit(borderWidthAttr)
-      : parseValueWithUnit(anchorStyles['border-width'] || '0');
+  const borderWidth = borderWidthAttr
+    ? parseValueWithUnit(borderWidthAttr)
+    : parseValueWithUnit(anchorStyles['border-width'] || '0');
 
   // Shadow
   const shadowAttr = element.getAttribute('data-shadow');
   const shadow = shadowAttr ? parseShadow(shadowAttr) : parseShadow(anchorStyles['box-shadow']);
-
-  // Hover state from styleguide
-  const hoverBgColor = styleguideButtonStyle?.hover?.bg
-    ? normalizeColor(styleguideButtonStyle.hover.bg)
-    : null;
-  const hoverTextColor = styleguideButtonStyle?.hover?.color
-    ? normalizeColor(styleguideButtonStyle.hover.color)
-    : null;
 
   // Alignment
   const textAlign = element.getAttribute('data-align') || parseTextAlign(wrapperStyles['text-align']);
@@ -2029,7 +1976,6 @@ function parseButton(element, parentId, index, styleguideData = null) {
   const fullWidth = element.getAttribute('data-full-width') === 'true';
 
   // Build button selector - always include padding params
-  // When using styleguide button, also include data-style-guide-button attribute
   const buttonSelector = {
     attrs: {
       style: {},
@@ -2046,11 +1992,6 @@ function parseButton(element, parentId, index, styleguideData = null) {
       '--style-border-width--unit': borderWidth ? borderWidth.unit : 'px',
     },
   };
-
-  // Add styleguide button reference if present
-  if (styleGuideButton) {
-    buttonSelector.attrs['data-style-guide-button'] = styleGuideButton;
-  }
 
   // Parse animation attributes
   const { attrs: animationAttrs, params: animationParams } = parseAnimationAttrs(element);
@@ -2216,27 +2157,6 @@ function parseButton(element, parentId, index, styleguideData = null) {
   // Handle subtext color
   if (subText && subTextColor) {
     node.selectors['.elButton .elButtonSub'].attrs.style.color = subTextColor;
-  }
-
-  // Add hover state selectors if available from styleguide
-  if (hoverBgColor) {
-    node.selectors['.elButton:hover'] = {
-      attrs: {
-        style: {},
-      },
-      params: {
-        '--style-background-color': hoverBgColor,
-      },
-    };
-  }
-  if (hoverTextColor) {
-    node.selectors['.elButton:hover .elButtonText'] = {
-      attrs: {
-        style: {
-          color: hoverTextColor,
-        },
-      },
-    };
   }
 
   return node;
@@ -4392,276 +4312,6 @@ function parseConfirmationPlaceholder(element, parentId, index) {
  */
 
 /**
- * Get typescale sizes calculated from baseSize and scaleRatio.
- * Matches StyleguideEditor.tsx and cf-elements.js getTypescale() for consistency.
- * Returns element-specific scales because headlines, subheadlines, and paragraphs
- * have different sizes at the same preset (e.g., "s" for headline = 20px, "s" for paragraph = 13px).
- *
- * @param {Object} typography - Typography settings with baseSize and scaleRatio
- * @returns {Object|null} - Map of element types to their size preset maps
- */
-function getTypescale(typography) {
-  if (!typography) return null;
-
-  const { baseSize = 16, scaleRatio = 1.25 } = typography;
-  const r = scaleRatio;
-  const b = baseSize;
-
-  // Build the base scale points (negative = smaller, positive = larger)
-  const scale = {
-    n3: Math.round(b / Math.pow(r, 3)), // ~8
-    n2: Math.round(b / Math.pow(r, 2)), // ~10
-    n1: Math.round(b / r), // ~13
-    base: b, // 16
-    p1: Math.round(b * r), // ~20
-    p2: Math.round(b * Math.pow(r, 2)), // ~25
-    p3: Math.round(b * Math.pow(r, 3)), // ~31
-    p4: Math.round(b * Math.pow(r, 4)), // ~39
-    p5: Math.round(b * Math.pow(r, 5)), // ~49
-    p6: Math.round(b * Math.pow(r, 6)), // ~61
-    p7: Math.round(b * Math.pow(r, 7)), // ~76
-    p8: Math.round(b * Math.pow(r, 8)), // ~95
-  };
-
-  // Return element-specific scales (each element type maps presets to different scale points)
-  return {
-    headline: {
-      "5xl": scale.p8,
-      "4xl": scale.p7,
-      "3xl": scale.p6,
-      "2xl": scale.p5,
-      xl: scale.p4,
-      l: scale.p3,
-      lg: scale.p3,
-      m: scale.p2,
-      md: scale.p2,
-      s: scale.p1,
-      sm: scale.p1,
-      xs: scale.base,
-    },
-    subheadline: {
-      "5xl": scale.p7,
-      "4xl": scale.p6,
-      "3xl": scale.p5,
-      "2xl": scale.p4,
-      xl: scale.p3,
-      l: scale.p2,
-      lg: scale.p2,
-      m: scale.p1,
-      md: scale.p1,
-      s: scale.base,
-      sm: scale.base,
-      xs: scale.n1,
-    },
-    paragraph: {
-      "5xl": scale.p6,
-      "4xl": scale.p5,
-      "3xl": scale.p4,
-      "2xl": scale.p3,
-      xl: scale.p2,
-      l: scale.p1,
-      lg: scale.p1,
-      m: scale.base,
-      md: scale.base,
-      s: scale.n1,
-      sm: scale.n1,
-      xs: scale.n2,
-    },
-  };
-}
-
-/**
- * Apply styleguide fonts and colors as data attributes before parsing.
- * This ensures the parser captures styleguide-applied values.
- *
- * @param {Document|HTMLElement} root - The root element or document to process
- * @param {Object} styleguideData - Optional styleguide data (will try to read from embedded JSON if not provided)
- */
-function applyStyleguideDataAttributes(root, styleguideData = null) {
-  // Try to get styleguide from embedded JSON if not provided
-  if (!styleguideData) {
-    const scriptEl = root.querySelector
-      ? root.querySelector("#cf-styleguide-data")
-      : root.getElementById
-      ? root.getElementById("cf-styleguide-data")
-      : null;
-    if (scriptEl) {
-      try {
-        styleguideData = JSON.parse(scriptEl.textContent);
-      } catch (e) {
-        console.warn("PageTree Parser: Failed to parse styleguide data:", e);
-        return;
-      }
-    }
-  }
-
-  if (!styleguideData) return;
-
-  const { typography, paintThemes, colors } = styleguideData;
-
-  // Helper to get color hex by ID
-  const getColorHex = (colorId) => {
-    if (!colors) return "#000000";
-    const color = colors.find((c) => c.id === colorId);
-    return color ? color.hex : "#000000";
-  };
-
-  // Apply typography fonts to elements without explicit fonts
-  if (typography) {
-    const { headlineFont, subheadlineFont, contentFont } = typography;
-
-    if (headlineFont) {
-      root
-        .querySelectorAll('[data-type="Headline/V1"]:not([data-font])')
-        .forEach((el) => {
-          el.setAttribute("data-font", headlineFont);
-        });
-    }
-
-    if (subheadlineFont) {
-      root
-        .querySelectorAll('[data-type="SubHeadline/V1"]:not([data-font])')
-        .forEach((el) => {
-          el.setAttribute("data-font", subheadlineFont);
-        });
-    }
-
-    if (contentFont) {
-      root
-        .querySelectorAll('[data-type="Paragraph/V1"]:not([data-font])')
-        .forEach((el) => {
-          el.setAttribute("data-font", contentFont);
-        });
-    }
-  }
-
-  // Helper to check if element's closest paint-themed ancestor is the given container
-  // This prevents applying colors to elements inside nested non-paint containers
-  const isDirectPaintDescendant = (el, paintContainer) => {
-    // Find the closest ancestor with data-paint-colors attribute
-    const closestPaint = el.closest("[data-paint-colors]");
-    // Element should only get colors if its closest paint ancestor is this container
-    return closestPaint === paintContainer;
-  };
-
-  // Apply paint theme colors - OVERRIDE existing (paint themes take precedence)
-  // Only apply to elements that are direct descendants (no intervening non-paint containers)
-  if (paintThemes?.length) {
-    paintThemes.forEach((theme) => {
-      const containers = root.querySelectorAll(
-        `[data-paint-colors="${theme.id}"]`
-      );
-      containers.forEach((container) => {
-        const headlineColor = getColorHex(theme.headlineColorId);
-        const subheadlineColor = getColorHex(theme.subheadlineColorId);
-        const contentColor = getColorHex(theme.contentColorId);
-        const iconColor = getColorHex(theme.iconColorId);
-        const linkColor = theme.linkColorId
-          ? getColorHex(theme.linkColorId)
-          : null;
-
-        // Apply headline color (only to direct paint descendants)
-        container
-          .querySelectorAll('[data-type="Headline/V1"]')
-          .forEach((el) => {
-            if (isDirectPaintDescendant(el, container)) {
-              if (!el.hasAttribute("data-color-explicit")) {
-                el.setAttribute("data-color", headlineColor);
-              }
-              if (linkColor) el.setAttribute("data-link-color", linkColor);
-            }
-          });
-
-        // Apply subheadline color (only to direct paint descendants)
-        container
-          .querySelectorAll('[data-type="SubHeadline/V1"]')
-          .forEach((el) => {
-            if (isDirectPaintDescendant(el, container)) {
-              if (!el.hasAttribute("data-color-explicit")) {
-                el.setAttribute("data-color", subheadlineColor);
-              }
-              if (linkColor) el.setAttribute("data-link-color", linkColor);
-            }
-          });
-
-        // Apply content/paragraph color (only to direct paint descendants)
-        container
-          .querySelectorAll('[data-type="Paragraph/V1"]')
-          .forEach((el) => {
-            if (isDirectPaintDescendant(el, container)) {
-              if (!el.hasAttribute("data-color-explicit")) {
-                el.setAttribute("data-color", contentColor);
-              }
-              if (linkColor) el.setAttribute("data-link-color", linkColor);
-            }
-          });
-
-        // Apply icon color (only to direct paint descendants)
-        container.querySelectorAll('[data-type="Icon/V1"]').forEach((el) => {
-          if (isDirectPaintDescendant(el, container)) {
-            if (!el.hasAttribute("data-color-explicit")) {
-              el.setAttribute("data-color", iconColor);
-            }
-          }
-        });
-
-        // Apply colors to bullet lists (only to direct paint descendants)
-        container
-          .querySelectorAll('[data-type="BulletList/V1"]')
-          .forEach((el) => {
-            if (isDirectPaintDescendant(el, container)) {
-              if (!el.hasAttribute("data-text-color-explicit")) {
-                el.setAttribute("data-text-color", contentColor);
-              }
-              if (!el.hasAttribute("data-icon-color-explicit")) {
-                el.setAttribute("data-icon-color", iconColor);
-              }
-              if (linkColor) el.setAttribute("data-link-color", linkColor);
-            }
-          });
-      });
-    });
-  }
-
-  // Resolve size presets (xl, l, m, s) to pixel values for text elements
-  // This allows the parser to capture correct font sizes even when using presets
-  if (typography) {
-    const typescale = getTypescale(typography);
-
-    if (typescale) {
-      // Map data-type to element scale key
-      const elementTypeMap = {
-        "Headline/V1": "headline",
-        "SubHeadline/V1": "subheadline",
-        "Paragraph/V1": "paragraph",
-        "BulletList/V1": "paragraph", // Bullet lists use paragraph scale
-      };
-
-      // Find all text elements with a size attribute
-      const textElements = root.querySelectorAll(
-        '[data-type="Headline/V1"][data-size], ' +
-          '[data-type="SubHeadline/V1"][data-size], ' +
-          '[data-type="Paragraph/V1"][data-size], ' +
-          '[data-type="BulletList/V1"][data-size]'
-      );
-
-      textElements.forEach((el) => {
-        const sizeAttr = el.getAttribute("data-size");
-        const dataType = el.getAttribute("data-type");
-        const elementKey = elementTypeMap[dataType] || "headline";
-        const elementScale = typescale[elementKey];
-
-        // Check if it's a preset (not already a px value)
-        if (sizeAttr && elementScale && elementScale[sizeAttr] !== undefined) {
-          // Set the resolved pixel value as a separate attribute
-          el.setAttribute("data-size-resolved", `${elementScale[sizeAttr]}px`);
-        }
-      });
-    }
-  }
-}
-
-/**
  * Map of data-type to parser function
  */
 const PARSER_MAP = {
@@ -4696,10 +4346,10 @@ const PARSER_MAP = {
 };
 
 /**
- * Create parseElement function with styleguide data in closure
- * Also tracks element-id to internal-id mappings for scroll/show-hide resolution
+ * Create parseElement function
+ * Tracks element-id to internal-id mappings for scroll/show-hide resolution
  */
-function createParseElement(styleguideData, elementIdMap) {
+function createParseElement(elementIdMap) {
   function parseElement(element, parentId, index) {
     const dataType = getDataType(element);
 
@@ -4726,9 +4376,6 @@ function createParseElement(styleguideData, elementIdMap) {
     let node;
     if (containerTypes.includes(dataType)) {
       node = parser(element, parentId, index, parseElement);
-    } else if (dataType === "Button/V1") {
-      // Button needs styleguide data to look up button styles
-      node = parser(element, parentId, index, styleguideData);
     } else {
       node = parser(element, parentId, index);
     }
@@ -4793,10 +4440,9 @@ function resolveButtonReferences(node, elementIdMap) {
  * Parse the entire page tree starting from a root element
  *
  * @param {HTMLElement} rootElement - The root element to parse (default: find ContentNode)
- * @param {Object} styleguideData - Optional styleguide data for applying fonts/colors
  * @returns {Object} The pagetree JSON object
  */
-function parsePageTree(rootElement = null, styleguideData = null) {
+function parsePageTree(rootElement = null) {
   // Find the root ContentNode if not provided
   if (!rootElement) {
     rootElement = document.querySelector('[data-type="ContentNode"]');
@@ -4807,16 +4453,14 @@ function parsePageTree(rootElement = null, styleguideData = null) {
     return null;
   }
 
-  // Apply styleguide fonts and colors as data attributes before parsing
-  // This ensures the parser captures styleguide-applied values (fonts, paint theme colors)
+  // Get document root for popup detection
   const docRoot = rootElement.ownerDocument || document;
-  applyStyleguideDataAttributes(docRoot, styleguideData);
 
   // Create element ID map for scroll/show-hide reference resolution
   const elementIdMap = {};
 
-  // Create parseElement with styleguide data in closure for button style lookup
-  const parseElement = createParseElement(styleguideData, elementIdMap);
+  // Create parseElement function
+  const parseElement = createParseElement(elementIdMap);
 
   // Parse the content node
   const content = parseContentNode(rootElement, parseElement);
@@ -4951,15 +4595,10 @@ function parsePageTree(rootElement = null, styleguideData = null) {
  *
  * @param {HTMLElement} rootElement - The root element to parse
  * @param {boolean} pretty - Whether to pretty-print the JSON
- * @param {Object} styleguideData - Optional styleguide data for applying fonts/colors
  * @returns {string} The pagetree as JSON string
  */
-function exportPageTreeJSON(
-  rootElement = null,
-  pretty = true,
-  styleguideData = null
-) {
-  const pageTree = parsePageTree(rootElement, styleguideData);
+function exportPageTreeJSON(rootElement = null, pretty = true) {
+  const pageTree = parsePageTree(rootElement);
   if (!pageTree) return null;
 
   return pretty ? JSON.stringify(pageTree, null, 2) : JSON.stringify(pageTree);
@@ -4970,14 +4609,9 @@ function exportPageTreeJSON(
  *
  * @param {string} filename - The filename (default: 'pagetree.json')
  * @param {HTMLElement} rootElement - The root element to parse
- * @param {Object} styleguideData - Optional styleguide data for applying fonts/colors
  */
-function downloadPageTree(
-  filename = "pagetree.json",
-  rootElement = null,
-  styleguideData = null
-) {
-  const json = exportPageTreeJSON(rootElement, true, styleguideData);
+function downloadPageTree(filename = "pagetree.json", rootElement = null) {
+  const json = exportPageTreeJSON(rootElement, true);
   if (!json) return;
 
   const blob = new Blob([json], { type: "application/json" });
@@ -4996,14 +4630,10 @@ function downloadPageTree(
  * Copy pagetree JSON to clipboard
  *
  * @param {HTMLElement} rootElement - The root element to parse
- * @param {Object} styleguideData - Optional styleguide data for applying fonts/colors
  * @returns {Promise<boolean>} Whether the copy was successful
  */
-async function copyPageTreeToClipboard(
-  rootElement = null,
-  styleguideData = null
-) {
-  const json = exportPageTreeJSON(rootElement, true, styleguideData);
+async function copyPageTreeToClipboard(rootElement = null) {
+  const json = exportPageTreeJSON(rootElement, true);
   if (!json) return false;
 
   try {

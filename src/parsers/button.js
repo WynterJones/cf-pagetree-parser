@@ -34,9 +34,8 @@ import {
  * @param {HTMLElement} element - The button element
  * @param {string} parentId - Parent element ID
  * @param {number} index - Child index
- * @param {Object} styleguideData - Optional styleguide data for looking up button styles
  */
-export function parseButton(element, parentId, index, styleguideData = null) {
+export function parseButton(element, parentId, index) {
   const id = generateId();
   const mainTextId = generateId();
   const subTextId = generateId();
@@ -53,15 +52,6 @@ export function parseButton(element, parentId, index, styleguideData = null) {
   const hideIds = element.getAttribute('data-hide-ids');
   const elButtonType = element.getAttribute('data-elbuttontype');
 
-  // Check for styleguide button
-  const styleGuideButton = element.getAttribute('data-style-guide-button');
-
-  // Look up button style from styleguide if available
-  let styleguideButtonStyle = null;
-  if (styleGuideButton && styleguideData?.buttons) {
-    styleguideButtonStyle = styleguideData.buttons.find(btn => btn.id === styleGuideButton);
-  }
-
   // Find the anchor element for fallback parsing
   const anchor = element.querySelector('a');
   const anchorStyles = anchor ? parseInlineStyle(anchor.getAttribute('style') || '') : {};
@@ -70,21 +60,16 @@ export function parseButton(element, parentId, index, styleguideData = null) {
   const textSpan = anchor ? anchor.querySelector('span') : null;
   const textStyles = textSpan ? parseInlineStyle(textSpan.getAttribute('style') || '') : {};
 
-  // Read from styleguide button style first, then data attributes, then inline styles
-  // Styleguide button structure: { regular: { bg, color }, hover: { bg, color }, borderRadius, borderWidth, borderColor }
+  // Read from data attributes first, then inline styles
   const bgAttr = element.getAttribute('data-bg');
-  const bgColor = styleguideButtonStyle?.regular?.bg
-    ? normalizeColor(styleguideButtonStyle.regular.bg)
-    : bgAttr
-      ? normalizeColor(bgAttr)
-      : (normalizeColor(anchorStyles['background-color']) || '#3b82f6');
+  const bgColor = bgAttr
+    ? normalizeColor(bgAttr)
+    : (normalizeColor(anchorStyles['background-color']) || '#3b82f6');
 
   const textColorAttr = element.getAttribute('data-color');
-  const textColor = styleguideButtonStyle?.regular?.color
-    ? normalizeColor(styleguideButtonStyle.regular.color)
-    : textColorAttr
-      ? normalizeColor(textColorAttr)
-      : (normalizeColor(textStyles.color) || '#ffffff');
+  const textColor = textColorAttr
+    ? normalizeColor(textColorAttr)
+    : (normalizeColor(textStyles.color) || '#ffffff');
 
   // Font styling - prefer data attributes
   const fontSizeAttr = element.getAttribute('data-size');
@@ -98,39 +83,25 @@ export function parseButton(element, parentId, index, styleguideData = null) {
   const paddingHorizontal = pxAttr ? parseValueWithUnit(pxAttr) : parseValueWithUnit(anchorStyles['padding-right'] || '32px');
   const paddingVertical = pyAttr ? parseValueWithUnit(pyAttr) : parseValueWithUnit(anchorStyles['padding-top'] || '16px');
 
-  // Border and corners - styleguide first, then data attributes
+  // Border and corners - data attributes first, then inline styles
   const roundedAttr = element.getAttribute('data-rounded');
-  const borderRadius = styleguideButtonStyle?.borderRadius != null
-    ? { value: styleguideButtonStyle.borderRadius, unit: 'px' }
-    : roundedAttr
-      ? parseValueWithUnit(roundedAttr)
-      : parseBorderRadius(anchorStyles);
+  const borderRadius = roundedAttr
+    ? parseValueWithUnit(roundedAttr)
+    : parseBorderRadius(anchorStyles);
 
   const borderColorAttr = element.getAttribute('data-border-color');
-  const borderColor = styleguideButtonStyle?.borderColor
-    ? normalizeColor(styleguideButtonStyle.borderColor)
-    : borderColorAttr
-      ? normalizeColor(borderColorAttr)
-      : normalizeColor(anchorStyles['border-color']);
+  const borderColor = borderColorAttr
+    ? normalizeColor(borderColorAttr)
+    : normalizeColor(anchorStyles['border-color']);
 
   const borderWidthAttr = element.getAttribute('data-border-width');
-  const borderWidth = styleguideButtonStyle?.borderWidth != null
-    ? { value: styleguideButtonStyle.borderWidth, unit: 'px' }
-    : borderWidthAttr
-      ? parseValueWithUnit(borderWidthAttr)
-      : parseValueWithUnit(anchorStyles['border-width'] || '0');
+  const borderWidth = borderWidthAttr
+    ? parseValueWithUnit(borderWidthAttr)
+    : parseValueWithUnit(anchorStyles['border-width'] || '0');
 
   // Shadow
   const shadowAttr = element.getAttribute('data-shadow');
   const shadow = shadowAttr ? parseShadow(shadowAttr) : parseShadow(anchorStyles['box-shadow']);
-
-  // Hover state from styleguide
-  const hoverBgColor = styleguideButtonStyle?.hover?.bg
-    ? normalizeColor(styleguideButtonStyle.hover.bg)
-    : null;
-  const hoverTextColor = styleguideButtonStyle?.hover?.color
-    ? normalizeColor(styleguideButtonStyle.hover.color)
-    : null;
 
   // Alignment
   const textAlign = element.getAttribute('data-align') || parseTextAlign(wrapperStyles['text-align']);
@@ -165,7 +136,6 @@ export function parseButton(element, parentId, index, styleguideData = null) {
   const fullWidth = element.getAttribute('data-full-width') === 'true';
 
   // Build button selector - always include padding params
-  // When using styleguide button, also include data-style-guide-button attribute
   const buttonSelector = {
     attrs: {
       style: {},
@@ -182,11 +152,6 @@ export function parseButton(element, parentId, index, styleguideData = null) {
       '--style-border-width--unit': borderWidth ? borderWidth.unit : 'px',
     },
   };
-
-  // Add styleguide button reference if present
-  if (styleGuideButton) {
-    buttonSelector.attrs['data-style-guide-button'] = styleGuideButton;
-  }
 
   // Parse animation attributes
   const { attrs: animationAttrs, params: animationParams } = parseAnimationAttrs(element);
@@ -352,27 +317,6 @@ export function parseButton(element, parentId, index, styleguideData = null) {
   // Handle subtext color
   if (subText && subTextColor) {
     node.selectors['.elButton .elButtonSub'].attrs.style.color = subTextColor;
-  }
-
-  // Add hover state selectors if available from styleguide
-  if (hoverBgColor) {
-    node.selectors['.elButton:hover'] = {
-      attrs: {
-        style: {},
-      },
-      params: {
-        '--style-background-color': hoverBgColor,
-      },
-    };
-  }
-  if (hoverTextColor) {
-    node.selectors['.elButton:hover .elButtonText'] = {
-      attrs: {
-        style: {
-          color: hoverTextColor,
-        },
-      },
-    };
   }
 
   return node;

@@ -90,7 +90,6 @@ export function parseSectionContainer(element, parentId, index, parseChildren) {
     marginTop: spacing.marginTop || parseValueWithUnit('0px'),
   };
   const overlay = element.getAttribute('data-overlay');
-  const paintColors = element.getAttribute('data-paint-colors');
 
   // Video background attributes
   const videoBgUrl = element.getAttribute('data-video-bg-url');
@@ -132,11 +131,6 @@ export function parseSectionContainer(element, parentId, index, parseChildren) {
   // Add custom element ID for scroll-to/show-hide targeting
   if (elementId) {
     node.attrs.id = elementId;
-  }
-
-  // Add paint colors if present
-  if (paintColors) {
-    node.attrs['data-paint-colors'] = paintColors;
   }
 
   // Apply spacing
@@ -267,7 +261,6 @@ export function parseRowContainer(element, parentId, index, parseChildren) {
     marginTop: spacing.marginTop || parseValueWithUnit('0px'),
   };
   const overlay = element.getAttribute('data-overlay');
-  const paintColors = element.getAttribute('data-paint-colors');
 
   const width = parseValueWithUnit(styles.width || '1170px');
 
@@ -320,11 +313,6 @@ export function parseRowContainer(element, parentId, index, parseChildren) {
   // Add custom element ID for scroll-to/show-hide targeting
   if (elementId) {
     node.attrs.id = elementId;
-  }
-
-  // Add paint colors if present
-  if (paintColors) {
-    node.attrs['data-paint-colors'] = paintColors;
   }
 
   // Add className if set
@@ -470,7 +458,6 @@ export function parseColContainer(element, parentId, index, parseChildren) {
     const overlay = colInner.getAttribute('data-overlay');
     const separateCorners = colInner.getAttribute('data-separate-corners') === 'true';
     const borderRadius = parseBorderRadius(innerStyles);
-    const paintColors = colInner.getAttribute('data-paint-colors');
 
     const colInnerSelector = node.selectors['& > .col-inner'];
 
@@ -586,11 +573,6 @@ export function parseColContainer(element, parentId, index, parseChildren) {
     colInnerSelector.attrs['data-skip-background-settings'] =
       (hasBackground || overlay) ? 'false' : 'true';
 
-    // Add paint colors if present
-    if (paintColors) {
-      colInnerSelector.attrs['data-paint-colors'] = paintColors;
-    }
-
     // Parse children from col-inner, skipping overlay and content wrapper
     let childIdx = 0;
     const parseColInnerChildren = (container) => {
@@ -650,7 +632,6 @@ export function parseFlexContainer(element, parentId, index, parseChildren) {
     marginTop: spacing.marginTop || parseValueWithUnit('0px'),
   };
   const overlay = element.getAttribute('data-overlay');
-  const paintColors = element.getAttribute('data-paint-colors');
 
   const width = parseValueWithUnit(styles.width || '100%', '%');
   const height = styles.height ? parseValueWithUnit(styles.height, 'px') : null;
@@ -690,11 +671,6 @@ export function parseFlexContainer(element, parentId, index, parseChildren) {
   // Add custom element ID for scroll-to/show-hide targeting
   if (elementId) {
     node.attrs.id = elementId;
-  }
-
-  // Add paint colors if present
-  if (paintColors) {
-    node.attrs['data-paint-colors'] = paintColors;
   }
 
   // Add width

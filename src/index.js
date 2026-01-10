@@ -54,276 +54,6 @@ import {
 } from "./parsers/index.js";
 
 /**
- * Get typescale sizes calculated from baseSize and scaleRatio.
- * Matches StyleguideEditor.tsx and cf-elements.js getTypescale() for consistency.
- * Returns element-specific scales because headlines, subheadlines, and paragraphs
- * have different sizes at the same preset (e.g., "s" for headline = 20px, "s" for paragraph = 13px).
- *
- * @param {Object} typography - Typography settings with baseSize and scaleRatio
- * @returns {Object|null} - Map of element types to their size preset maps
- */
-function getTypescale(typography) {
-  if (!typography) return null;
-
-  const { baseSize = 16, scaleRatio = 1.25 } = typography;
-  const r = scaleRatio;
-  const b = baseSize;
-
-  // Build the base scale points (negative = smaller, positive = larger)
-  const scale = {
-    n3: Math.round(b / Math.pow(r, 3)), // ~8
-    n2: Math.round(b / Math.pow(r, 2)), // ~10
-    n1: Math.round(b / r), // ~13
-    base: b, // 16
-    p1: Math.round(b * r), // ~20
-    p2: Math.round(b * Math.pow(r, 2)), // ~25
-    p3: Math.round(b * Math.pow(r, 3)), // ~31
-    p4: Math.round(b * Math.pow(r, 4)), // ~39
-    p5: Math.round(b * Math.pow(r, 5)), // ~49
-    p6: Math.round(b * Math.pow(r, 6)), // ~61
-    p7: Math.round(b * Math.pow(r, 7)), // ~76
-    p8: Math.round(b * Math.pow(r, 8)), // ~95
-  };
-
-  // Return element-specific scales (each element type maps presets to different scale points)
-  return {
-    headline: {
-      "5xl": scale.p8,
-      "4xl": scale.p7,
-      "3xl": scale.p6,
-      "2xl": scale.p5,
-      xl: scale.p4,
-      l: scale.p3,
-      lg: scale.p3,
-      m: scale.p2,
-      md: scale.p2,
-      s: scale.p1,
-      sm: scale.p1,
-      xs: scale.base,
-    },
-    subheadline: {
-      "5xl": scale.p7,
-      "4xl": scale.p6,
-      "3xl": scale.p5,
-      "2xl": scale.p4,
-      xl: scale.p3,
-      l: scale.p2,
-      lg: scale.p2,
-      m: scale.p1,
-      md: scale.p1,
-      s: scale.base,
-      sm: scale.base,
-      xs: scale.n1,
-    },
-    paragraph: {
-      "5xl": scale.p6,
-      "4xl": scale.p5,
-      "3xl": scale.p4,
-      "2xl": scale.p3,
-      xl: scale.p2,
-      l: scale.p1,
-      lg: scale.p1,
-      m: scale.base,
-      md: scale.base,
-      s: scale.n1,
-      sm: scale.n1,
-      xs: scale.n2,
-    },
-  };
-}
-
-/**
- * Apply styleguide fonts and colors as data attributes before parsing.
- * This ensures the parser captures styleguide-applied values.
- *
- * @param {Document|HTMLElement} root - The root element or document to process
- * @param {Object} styleguideData - Optional styleguide data (will try to read from embedded JSON if not provided)
- */
-function applyStyleguideDataAttributes(root, styleguideData = null) {
-  // Try to get styleguide from embedded JSON if not provided
-  if (!styleguideData) {
-    const scriptEl = root.querySelector
-      ? root.querySelector("#cf-styleguide-data")
-      : root.getElementById
-      ? root.getElementById("cf-styleguide-data")
-      : null;
-    if (scriptEl) {
-      try {
-        styleguideData = JSON.parse(scriptEl.textContent);
-      } catch (e) {
-        console.warn("PageTree Parser: Failed to parse styleguide data:", e);
-        return;
-      }
-    }
-  }
-
-  if (!styleguideData) return;
-
-  const { typography, paintThemes, colors } = styleguideData;
-
-  // Helper to get color hex by ID
-  const getColorHex = (colorId) => {
-    if (!colors) return "#000000";
-    const color = colors.find((c) => c.id === colorId);
-    return color ? color.hex : "#000000";
-  };
-
-  // Apply typography fonts to elements without explicit fonts
-  if (typography) {
-    const { headlineFont, subheadlineFont, contentFont } = typography;
-
-    if (headlineFont) {
-      root
-        .querySelectorAll('[data-type="Headline/V1"]:not([data-font])')
-        .forEach((el) => {
-          el.setAttribute("data-font", headlineFont);
-        });
-    }
-
-    if (subheadlineFont) {
-      root
-        .querySelectorAll('[data-type="SubHeadline/V1"]:not([data-font])')
-        .forEach((el) => {
-          el.setAttribute("data-font", subheadlineFont);
-        });
-    }
-
-    if (contentFont) {
-      root
-        .querySelectorAll('[data-type="Paragraph/V1"]:not([data-font])')
-        .forEach((el) => {
-          el.setAttribute("data-font", contentFont);
-        });
-    }
-  }
-
-  // Helper to check if element's closest paint-themed ancestor is the given container
-  // This prevents applying colors to elements inside nested non-paint containers
-  const isDirectPaintDescendant = (el, paintContainer) => {
-    // Find the closest ancestor with data-paint-colors attribute
-    const closestPaint = el.closest("[data-paint-colors]");
-    // Element should only get colors if its closest paint ancestor is this container
-    return closestPaint === paintContainer;
-  };
-
-  // Apply paint theme colors - OVERRIDE existing (paint themes take precedence)
-  // Only apply to elements that are direct descendants (no intervening non-paint containers)
-  if (paintThemes?.length) {
-    paintThemes.forEach((theme) => {
-      const containers = root.querySelectorAll(
-        `[data-paint-colors="${theme.id}"]`
-      );
-      containers.forEach((container) => {
-        const headlineColor = getColorHex(theme.headlineColorId);
-        const subheadlineColor = getColorHex(theme.subheadlineColorId);
-        const contentColor = getColorHex(theme.contentColorId);
-        const iconColor = getColorHex(theme.iconColorId);
-        const linkColor = theme.linkColorId
-          ? getColorHex(theme.linkColorId)
-          : null;
-
-        // Apply headline color (only to direct paint descendants)
-        container
-          .querySelectorAll('[data-type="Headline/V1"]')
-          .forEach((el) => {
-            if (isDirectPaintDescendant(el, container)) {
-              if (!el.hasAttribute("data-color-explicit")) {
-                el.setAttribute("data-color", headlineColor);
-              }
-              if (linkColor) el.setAttribute("data-link-color", linkColor);
-            }
-          });
-
-        // Apply subheadline color (only to direct paint descendants)
-        container
-          .querySelectorAll('[data-type="SubHeadline/V1"]')
-          .forEach((el) => {
-            if (isDirectPaintDescendant(el, container)) {
-              if (!el.hasAttribute("data-color-explicit")) {
-                el.setAttribute("data-color", subheadlineColor);
-              }
-              if (linkColor) el.setAttribute("data-link-color", linkColor);
-            }
-          });
-
-        // Apply content/paragraph color (only to direct paint descendants)
-        container
-          .querySelectorAll('[data-type="Paragraph/V1"]')
-          .forEach((el) => {
-            if (isDirectPaintDescendant(el, container)) {
-              if (!el.hasAttribute("data-color-explicit")) {
-                el.setAttribute("data-color", contentColor);
-              }
-              if (linkColor) el.setAttribute("data-link-color", linkColor);
-            }
-          });
-
-        // Apply icon color (only to direct paint descendants)
-        container.querySelectorAll('[data-type="Icon/V1"]').forEach((el) => {
-          if (isDirectPaintDescendant(el, container)) {
-            if (!el.hasAttribute("data-color-explicit")) {
-              el.setAttribute("data-color", iconColor);
-            }
-          }
-        });
-
-        // Apply colors to bullet lists (only to direct paint descendants)
-        container
-          .querySelectorAll('[data-type="BulletList/V1"]')
-          .forEach((el) => {
-            if (isDirectPaintDescendant(el, container)) {
-              if (!el.hasAttribute("data-text-color-explicit")) {
-                el.setAttribute("data-text-color", contentColor);
-              }
-              if (!el.hasAttribute("data-icon-color-explicit")) {
-                el.setAttribute("data-icon-color", iconColor);
-              }
-              if (linkColor) el.setAttribute("data-link-color", linkColor);
-            }
-          });
-      });
-    });
-  }
-
-  // Resolve size presets (xl, l, m, s) to pixel values for text elements
-  // This allows the parser to capture correct font sizes even when using presets
-  if (typography) {
-    const typescale = getTypescale(typography);
-
-    if (typescale) {
-      // Map data-type to element scale key
-      const elementTypeMap = {
-        "Headline/V1": "headline",
-        "SubHeadline/V1": "subheadline",
-        "Paragraph/V1": "paragraph",
-        "BulletList/V1": "paragraph", // Bullet lists use paragraph scale
-      };
-
-      // Find all text elements with a size attribute
-      const textElements = root.querySelectorAll(
-        '[data-type="Headline/V1"][data-size], ' +
-          '[data-type="SubHeadline/V1"][data-size], ' +
-          '[data-type="Paragraph/V1"][data-size], ' +
-          '[data-type="BulletList/V1"][data-size]'
-      );
-
-      textElements.forEach((el) => {
-        const sizeAttr = el.getAttribute("data-size");
-        const dataType = el.getAttribute("data-type");
-        const elementKey = elementTypeMap[dataType] || "headline";
-        const elementScale = typescale[elementKey];
-
-        // Check if it's a preset (not already a px value)
-        if (sizeAttr && elementScale && elementScale[sizeAttr] !== undefined) {
-          // Set the resolved pixel value as a separate attribute
-          el.setAttribute("data-size-resolved", `${elementScale[sizeAttr]}px`);
-        }
-      });
-    }
-  }
-}
-
-/**
  * Map of data-type to parser function
  */
 const PARSER_MAP = {
@@ -358,10 +88,10 @@ const PARSER_MAP = {
 };
 
 /**
- * Create parseElement function with styleguide data in closure
- * Also tracks element-id to internal-id mappings for scroll/show-hide resolution
+ * Create parseElement function
+ * Tracks element-id to internal-id mappings for scroll/show-hide resolution
  */
-function createParseElement(styleguideData, elementIdMap) {
+function createParseElement(elementIdMap) {
   function parseElement(element, parentId, index) {
     const dataType = getDataType(element);
 
@@ -388,9 +118,6 @@ function createParseElement(styleguideData, elementIdMap) {
     let node;
     if (containerTypes.includes(dataType)) {
       node = parser(element, parentId, index, parseElement);
-    } else if (dataType === "Button/V1") {
-      // Button needs styleguide data to look up button styles
-      node = parser(element, parentId, index, styleguideData);
     } else {
       node = parser(element, parentId, index);
     }
@@ -455,10 +182,9 @@ function resolveButtonReferences(node, elementIdMap) {
  * Parse the entire page tree starting from a root element
  *
  * @param {HTMLElement} rootElement - The root element to parse (default: find ContentNode)
- * @param {Object} styleguideData - Optional styleguide data for applying fonts/colors
  * @returns {Object} The pagetree JSON object
  */
-export function parsePageTree(rootElement = null, styleguideData = null) {
+export function parsePageTree(rootElement = null) {
   // Find the root ContentNode if not provided
   if (!rootElement) {
     rootElement = document.querySelector('[data-type="ContentNode"]');
@@ -469,16 +195,14 @@ export function parsePageTree(rootElement = null, styleguideData = null) {
     return null;
   }
 
-  // Apply styleguide fonts and colors as data attributes before parsing
-  // This ensures the parser captures styleguide-applied values (fonts, paint theme colors)
+  // Get document root for popup detection
   const docRoot = rootElement.ownerDocument || document;
-  applyStyleguideDataAttributes(docRoot, styleguideData);
 
   // Create element ID map for scroll/show-hide reference resolution
   const elementIdMap = {};
 
-  // Create parseElement with styleguide data in closure for button style lookup
-  const parseElement = createParseElement(styleguideData, elementIdMap);
+  // Create parseElement function
+  const parseElement = createParseElement(elementIdMap);
 
   // Parse the content node
   const content = parseContentNode(rootElement, parseElement);
@@ -613,15 +337,10 @@ export function parsePageTree(rootElement = null, styleguideData = null) {
  *
  * @param {HTMLElement} rootElement - The root element to parse
  * @param {boolean} pretty - Whether to pretty-print the JSON
- * @param {Object} styleguideData - Optional styleguide data for applying fonts/colors
  * @returns {string} The pagetree as JSON string
  */
-export function exportPageTreeJSON(
-  rootElement = null,
-  pretty = true,
-  styleguideData = null
-) {
-  const pageTree = parsePageTree(rootElement, styleguideData);
+export function exportPageTreeJSON(rootElement = null, pretty = true) {
+  const pageTree = parsePageTree(rootElement);
   if (!pageTree) return null;
 
   return pretty ? JSON.stringify(pageTree, null, 2) : JSON.stringify(pageTree);
@@ -632,14 +351,9 @@ export function exportPageTreeJSON(
  *
  * @param {string} filename - The filename (default: 'pagetree.json')
  * @param {HTMLElement} rootElement - The root element to parse
- * @param {Object} styleguideData - Optional styleguide data for applying fonts/colors
  */
-export function downloadPageTree(
-  filename = "pagetree.json",
-  rootElement = null,
-  styleguideData = null
-) {
-  const json = exportPageTreeJSON(rootElement, true, styleguideData);
+export function downloadPageTree(filename = "pagetree.json", rootElement = null) {
+  const json = exportPageTreeJSON(rootElement, true);
   if (!json) return;
 
   const blob = new Blob([json], { type: "application/json" });
@@ -658,14 +372,10 @@ export function downloadPageTree(
  * Copy pagetree JSON to clipboard
  *
  * @param {HTMLElement} rootElement - The root element to parse
- * @param {Object} styleguideData - Optional styleguide data for applying fonts/colors
  * @returns {Promise<boolean>} Whether the copy was successful
  */
-export async function copyPageTreeToClipboard(
-  rootElement = null,
-  styleguideData = null
-) {
-  const json = exportPageTreeJSON(rootElement, true, styleguideData);
+export async function copyPageTreeToClipboard(rootElement = null) {
+  const json = exportPageTreeJSON(rootElement, true);
   if (!json) return false;
 
   try {
