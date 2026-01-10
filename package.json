@@ -1,0 +1,33 @@
+{
+  "name": "cf-pagetree-parser",
+  "version": "1.0.0",
+  "description": "Parse FunnelWind HTML to ClickFunnels PageTree JSON",
+  "main": "src/index.js",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./utils": "./src/utils.js",
+    "./styles": "./src/styles.js",
+    "./parsers/*": "./src/parsers/*.js"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/bundle.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "clickfunnels",
+    "pagetree",
+    "funnelwind",
+    "parser"
+  ],
+  "author": "BarnumPT",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/barnumpt/cf-pagetree-parser"
+  }
+}
