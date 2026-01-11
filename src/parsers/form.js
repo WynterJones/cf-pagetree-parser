@@ -562,9 +562,16 @@ export function parseCheckbox(element, parentId, index) {
   const boxBorderColor = boxBorderMatch ? normalizeColor(boxBorderMatch[2]) : 'rgb(229, 231, 235)';
   const boxBorderRadius = parseBorderRadius(boxStyles);
 
-  // Label text styling
+  // Label text styling - inherit page color if not set
   const textStyles = textSpan ? parseInlineStyle(textSpan.getAttribute('style') || '') : {};
-  const labelColor = normalizeColor(textStyles.color || '#334155');
+  let labelColor;
+  if (textStyles.color) {
+    labelColor = normalizeColor(textStyles.color);
+  } else {
+    const contentNode = element.closest('[data-type="ContentNode"]');
+    const pageColor = contentNode?.getAttribute("data-color") || contentNode?.getAttribute("data-text-color");
+    labelColor = pageColor ? normalizeColor(pageColor) : '#334155';
+  }
   const labelFontSize = parseValueWithUnit(textStyles['font-size'] || '16px');
 
   // Gap between checkbox and label

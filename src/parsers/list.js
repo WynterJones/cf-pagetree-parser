@@ -54,12 +54,17 @@ export function parseBulletList(element, parentId, index) {
   // Find list items
   const items = ul ? ul.querySelectorAll('li') : [];
 
+  // Get page-level color from ContentNode for fallback
+  const contentNode = element.closest('[data-type="ContentNode"]');
+  const pageColor = contentNode?.getAttribute("data-color") || contentNode?.getAttribute("data-text-color");
+  const defaultTextColor = pageColor ? normalizeColor(pageColor) : '#334155';
+
   // Initialize with defaults, will be overridden by data attrs or inline styles
   let iconClass = 'fas fa-check fa_icon';
   let iconColor = '#10b981';
   let iconMarginRight = 12;
   let iconSize = null;
-  let textColor = '#334155';
+  let textColor = defaultTextColor;
   let textSize = null;
   let justifyContent = 'flex-start';
 

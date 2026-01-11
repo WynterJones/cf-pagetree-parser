@@ -13,14 +13,13 @@ npm install cf-pagetree-parser
 ### ES Modules (Next.js, Node.js)
 
 ```javascript
-import { parsePageTree, exportPageTreeJSON } from 'cf-pagetree-parser';
+import { parsePageTree } from 'cf-pagetree-parser';
 
-// Parse a DOM element to PageTree
-const rootElement = document.querySelector('[data-type="ContentNode"]');
-const pageTree = parsePageTree(rootElement);
+// Parse to PageTree JSON (automatically finds ContentNode)
+const pageTree = parsePageTree();
 
-// Export as JSON string
-const json = exportPageTreeJSON(rootElement, true);
+// The result is ready for ClickFunnels import
+console.log(JSON.stringify(pageTree, null, 2));
 ```
 
 ### Browser (Standalone Bundle)
@@ -29,7 +28,9 @@ const json = exportPageTreeJSON(rootElement, true);
 <script src="dist/cf-pagetree-parser.js"></script>
 <script>
   const { parsePageTree } = CFPageTreeParser;
-  const pageTree = parsePageTree(rootElement);
+
+  // Automatically finds ContentNode in the document
+  const pageTree = parsePageTree();
 </script>
 ```
 
@@ -41,12 +42,10 @@ The `dist/cf-pagetree-parser.js` bundle can be used in sandboxed extension conte
 
 ### Main Functions
 
-- `parsePageTree(rootElement)` - Parse DOM to PageTree object
-- `parseElement(element, parentId, index)` - Parse single element
-- `extractPageSettings(rootElement)` - Extract page settings
-- `exportPageTreeJSON(rootElement, formatted?)` - Export as JSON string
-- `downloadPageTreeJSON(rootElement, filename?)` - Download JSON file
-- `copyPageTreeToClipboard(rootElement)` - Copy to clipboard
+- `parsePageTree(rootElement?)` - Parse DOM to PageTree object. If no element provided, automatically finds ContentNode.
+- `exportPageTreeJSON(rootElement?, formatted?)` - Export as JSON string
+- `downloadPageTree(filename?, rootElement?)` - Download JSON file
+- `copyPageTreeToClipboard(rootElement?)` - Copy to clipboard
 
 ### Utilities
 
@@ -72,8 +71,8 @@ The parser extracts page-level settings from cf-page attributes:
 | Attribute | Description |
 |-----------|-------------|
 | `font` | Page font family (e.g., "Poppins"). Applied to body-level styles. |
-| `font-family` | Alias for `font` |
-| `text-color` | Default text color (default: #334155) |
+| `color` | Default text color for all elements (default: #334155) |
+| `text-color` | Alias for `color` |
 | `link-color` | Default link color (default: #3b82f6) |
 | `font-weight` | Default font weight |
 | `css` | Custom CSS (URL-encoded) |

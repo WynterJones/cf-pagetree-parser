@@ -73,10 +73,19 @@ function parseTextElement(
     ? parseFontFamily(fontAttr)
     : parseFontFamily(textStyles["font-family"]);
 
+  // Get color: element data-color > inline style > page color > default
   const colorAttr = element.getAttribute("data-color");
-  const color = colorAttr
-    ? normalizeColor(colorAttr)
-    : normalizeColor(textStyles.color || "#000000");
+  let color;
+  if (colorAttr) {
+    color = normalizeColor(colorAttr);
+  } else if (textStyles.color) {
+    color = normalizeColor(textStyles.color);
+  } else {
+    // Fall back to page-level color from ContentNode
+    const contentNode = element.closest('[data-type="ContentNode"]');
+    const pageColor = contentNode?.getAttribute("data-color") || contentNode?.getAttribute("data-text-color");
+    color = pageColor ? normalizeColor(pageColor) : "#000000";
+  }
 
   const alignAttr = element.getAttribute("data-align");
   const textAlign = alignAttr || parseTextAlign(textStyles["text-align"]);

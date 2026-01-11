@@ -1653,10 +1653,19 @@ function parseTextElement(
     ? parseFontFamily(fontAttr)
     : parseFontFamily(textStyles["font-family"]);
 
+  // Get color: element data-color > inline style > page color > default
   const colorAttr = element.getAttribute("data-color");
-  const color = colorAttr
-    ? normalizeColor(colorAttr)
-    : normalizeColor(textStyles.color || "#000000");
+  let color;
+  if (colorAttr) {
+    color = normalizeColor(colorAttr);
+  } else if (textStyles.color) {
+    color = normalizeColor(textStyles.color);
+  } else {
+    // Fall back to page-level color from ContentNode
+    const contentNode = element.closest('[data-type="ContentNode"]');
+    const pageColor = contentNode?.getAttribute("data-color") || contentNode?.getAttribute("data-text-color");
+    color = pageColor ? normalizeColor(pageColor) : "#000000";
+  }
 
   const alignAttr = element.getAttribute("data-align");
   const textAlign = alignAttr || parseTextAlign(textStyles["text-align"]);
@@ -3075,9 +3084,16 @@ function parseCheckbox(element, parentId, index) {
   const boxBorderColor = boxBorderMatch ? normalizeColor(boxBorderMatch[2]) : 'rgb(229, 231, 235)';
   const boxBorderRadius = parseBorderRadius(boxStyles);
 
-  // Label text styling
+  // Label text styling - inherit page color if not set
   const textStyles = textSpan ? parseInlineStyle(textSpan.getAttribute('style') || '') : {};
-  const labelColor = normalizeColor(textStyles.color || '#334155');
+  let labelColor;
+  if (textStyles.color) {
+    labelColor = normalizeColor(textStyles.color);
+  } else {
+    const contentNode = element.closest('[data-type="ContentNode"]');
+    const pageColor = contentNode?.getAttribute("data-color") || contentNode?.getAttribute("data-text-color");
+    labelColor = pageColor ? normalizeColor(pageColor) : '#334155';
+  }
   const labelFontSize = parseValueWithUnit(textStyles['font-size'] || '16px');
 
   // Gap between checkbox and label
@@ -3229,12 +3245,17 @@ function parseBulletList(element, parentId, index) {
   // Find list items
   const items = ul ? ul.querySelectorAll('li') : [];
 
+  // Get page-level color from ContentNode for fallback
+  const contentNode = element.closest('[data-type="ContentNode"]');
+  const pageColor = contentNode?.getAttribute("data-color") || contentNode?.getAttribute("data-text-color");
+  const defaultTextColor = pageColor ? normalizeColor(pageColor) : '#334155';
+
   // Initialize with defaults, will be overridden by data attrs or inline styles
   let iconClass = 'fas fa-check fa_icon';
   let iconColor = '#10b981';
   let iconMarginRight = 12;
   let iconSize = null;
-  let textColor = '#334155';
+  let textColor = defaultTextColor;
   let textSize = null;
   let justifyContent = 'flex-start';
 
