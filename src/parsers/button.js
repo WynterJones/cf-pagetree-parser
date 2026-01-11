@@ -40,6 +40,9 @@ export function parseButton(element, parentId, index) {
   const mainTextId = generateId();
   const subTextId = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -162,6 +165,7 @@ export function parseButton(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       style: {
         'text-align': textAlign,
       },

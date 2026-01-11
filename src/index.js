@@ -221,7 +221,8 @@ export function parsePageTree(rootElement = null) {
   }
 
   // Extract page settings from data attributes
-  const textColorRaw = rootElement.getAttribute("data-text-color") || "#334155";
+  // Support both 'color' (simple) and 'text-color' (explicit) for page text color
+  const textColorRaw = rootElement.getAttribute("data-color") || rootElement.getAttribute("data-text-color") || "#334155";
   const linkColorRaw = rootElement.getAttribute("data-link-color") || "#3b82f6";
   const textColor = normalizeColor(textColorRaw);
   const linkColor = normalizeColor(linkColorRaw);

@@ -29,6 +29,9 @@ export function parseBulletList(element, parentId, index) {
   const id = generateId();
   const contentEditableId = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -156,6 +159,7 @@ export function parseBulletList(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       style: {},
     },
     params: {

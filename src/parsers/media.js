@@ -35,6 +35,9 @@ import {
 export function parseImage(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
   const textAlign = parseTextAlign(wrapperStyles['text-align']);
@@ -63,6 +66,7 @@ export function parseImage(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       alt,
       style: {
         'text-align': textAlign,
@@ -131,6 +135,9 @@ export function parseImage(element, parentId, index) {
 export function parseIcon(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
   const textAlign = parseTextAlign(wrapperStyles['text-align']);
@@ -166,6 +173,7 @@ export function parseIcon(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       style: {},
       ...animationAttrs,
     },
@@ -214,6 +222,9 @@ export function parseIcon(element, parentId, index) {
 export function parseVideo(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -237,6 +248,7 @@ export function parseVideo(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       'data-video-type': videoType,
       'data-skip-background-settings': background.color ? 'false' : 'true',
       'data-skip-shadow-settings': shadow ? 'false' : 'true',
@@ -288,6 +300,9 @@ export function parseVideo(element, parentId, index) {
 export function parseDivider(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -333,6 +348,7 @@ export function parseDivider(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       style: {},
     },
     params: {

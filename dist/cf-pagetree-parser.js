@@ -1872,6 +1872,9 @@ function parseButton(element, parentId, index) {
   const mainTextId = generateId();
   const subTextId = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -1994,6 +1997,7 @@ function parseButton(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       style: {
         'text-align': textAlign,
       },
@@ -2170,6 +2174,9 @@ function parseButton(element, parentId, index) {
 function parseImage(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
   const textAlign = parseTextAlign(wrapperStyles['text-align']);
@@ -2198,6 +2205,7 @@ function parseImage(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       alt,
       style: {
         'text-align': textAlign,
@@ -2266,6 +2274,9 @@ function parseImage(element, parentId, index) {
 function parseIcon(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
   const textAlign = parseTextAlign(wrapperStyles['text-align']);
@@ -2301,6 +2312,7 @@ function parseIcon(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       style: {},
       ...animationAttrs,
     },
@@ -2349,6 +2361,9 @@ function parseIcon(element, parentId, index) {
 function parseVideo(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -2372,6 +2387,7 @@ function parseVideo(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       'data-video-type': videoType,
       'data-skip-background-settings': background.color ? 'false' : 'true',
       'data-skip-shadow-settings': shadow ? 'false' : 'true',
@@ -2423,6 +2439,9 @@ function parseVideo(element, parentId, index) {
 function parseDivider(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -2468,6 +2487,7 @@ function parseDivider(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       style: {},
     },
     params: {
@@ -2527,6 +2547,9 @@ function parseDivider(element, parentId, index) {
 function parseInput(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -2569,6 +2592,7 @@ function parseInput(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       'data-skip-shadow-settings': shadow ? 'false' : 'true',
       type: inputType === 'phone_number' ? 'tel' : (inputType === 'email' ? 'email' : 'text'),
       style: {
@@ -2687,6 +2711,9 @@ function parseInput(element, parentId, index) {
 function parseTextArea(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -2728,6 +2755,7 @@ function parseTextArea(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       'data-skip-shadow-settings': shadow ? 'false' : 'true',
       style: {
         width,
@@ -2844,6 +2872,9 @@ function parseTextArea(element, parentId, index) {
 function parseSelectBox(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -2912,6 +2943,7 @@ function parseSelectBox(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       style: {
         width,
         'margin-top': marginTop.value,
@@ -3017,6 +3049,9 @@ function parseSelectBox(element, parentId, index) {
 function parseCheckbox(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -3056,6 +3091,7 @@ function parseCheckbox(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       style: {},
     },
     params: {
@@ -3167,6 +3203,9 @@ function parseCheckbox(element, parentId, index) {
 function parseBulletList(element, parentId, index) {
   const id = generateId();
   const contentEditableId = generateId();
+
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
 
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
@@ -3295,6 +3334,7 @@ function parseBulletList(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       style: {},
     },
     params: {
@@ -3513,6 +3553,9 @@ function parseBulletList(element, parentId, index) {
 function parseProgressBar(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -3556,6 +3599,7 @@ function parseProgressBar(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       style: {},
     },
     params: {
@@ -3635,6 +3679,9 @@ function parseProgressBar(element, parentId, index) {
 function parseVideoPopup(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
   const textAlign = parseTextAlign(wrapperStyles['text-align']);
@@ -3673,6 +3720,7 @@ function parseVideoPopup(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       alt: alt || 'Video thumbnail',
     },
     params: {
@@ -3750,6 +3798,9 @@ function parseVideoPopup(element, parentId, index) {
 function parseCountdown(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -3823,6 +3874,10 @@ function parseCountdown(element, parentId, index) {
     version: 0,
     parentId,
     fractionalIndex: generateFractionalIndex(index),
+    attrs: {
+      ...(elementId ? { id: elementId } : {}),
+      style: {},
+    },
     params: {
       type: 'countdown',
       countdown_opts: {
@@ -3947,7 +4002,7 @@ function parseCountdown(element, parentId, index) {
 
   // Apply spacing
   const { attrs: spacingAttrs, params: spacingParams } = spacingToAttrsAndParams(spacing);
-  Object.assign(node.attrs || (node.attrs = {}), { style: spacingAttrs.style });
+  Object.assign(node.attrs.style, spacingAttrs.style);
   Object.assign(node.params, spacingParams);
 
   // Apply border to amount container
@@ -4467,7 +4522,8 @@ function parsePageTree(rootElement = null) {
   }
 
   // Extract page settings from data attributes
-  const textColorRaw = rootElement.getAttribute("data-text-color") || "#334155";
+  // Support both 'color' (simple) and 'text-color' (explicit) for page text color
+  const textColorRaw = rootElement.getAttribute("data-color") || rootElement.getAttribute("data-text-color") || "#334155";
   const linkColorRaw = rootElement.getAttribute("data-link-color") || "#3b82f6";
   const textColor = normalizeColor(textColorRaw);
   const linkColor = normalizeColor(linkColorRaw);

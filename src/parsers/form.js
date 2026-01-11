@@ -34,6 +34,9 @@ import {
 export function parseInput(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -76,6 +79,7 @@ export function parseInput(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       'data-skip-shadow-settings': shadow ? 'false' : 'true',
       type: inputType === 'phone_number' ? 'tel' : (inputType === 'email' ? 'email' : 'text'),
       style: {
@@ -194,6 +198,9 @@ export function parseInput(element, parentId, index) {
 export function parseTextArea(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -235,6 +242,7 @@ export function parseTextArea(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       'data-skip-shadow-settings': shadow ? 'false' : 'true',
       style: {
         width,
@@ -351,6 +359,9 @@ export function parseTextArea(element, parentId, index) {
 export function parseSelectBox(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -419,6 +430,7 @@ export function parseSelectBox(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       style: {
         width,
         'margin-top': marginTop.value,
@@ -524,6 +536,9 @@ export function parseSelectBox(element, parentId, index) {
 export function parseCheckbox(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -563,6 +578,7 @@ export function parseCheckbox(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       style: {},
     },
     params: {

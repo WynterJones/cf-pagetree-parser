@@ -33,6 +33,9 @@ import {
 export function parseProgressBar(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -76,6 +79,7 @@ export function parseProgressBar(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       style: {},
     },
     params: {
@@ -155,6 +159,9 @@ export function parseProgressBar(element, parentId, index) {
 export function parseVideoPopup(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
   const textAlign = parseTextAlign(wrapperStyles['text-align']);
@@ -193,6 +200,7 @@ export function parseVideoPopup(element, parentId, index) {
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       alt: alt || 'Video thumbnail',
     },
     params: {
@@ -270,6 +278,9 @@ export function parseVideoPopup(element, parentId, index) {
 export function parseCountdown(element, parentId, index) {
   const id = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute('style') || '');
   const spacing = parseSpacing(wrapperStyles);
 
@@ -343,6 +354,10 @@ export function parseCountdown(element, parentId, index) {
     version: 0,
     parentId,
     fractionalIndex: generateFractionalIndex(index),
+    attrs: {
+      ...(elementId ? { id: elementId } : {}),
+      style: {},
+    },
     params: {
       type: 'countdown',
       countdown_opts: {
@@ -467,7 +482,7 @@ export function parseCountdown(element, parentId, index) {
 
   // Apply spacing
   const { attrs: spacingAttrs, params: spacingParams } = spacingToAttrsAndParams(spacing);
-  Object.assign(node.attrs || (node.attrs = {}), { style: spacingAttrs.style });
+  Object.assign(node.attrs.style, spacingAttrs.style);
   Object.assign(node.params, spacingParams);
 
   // Apply border to amount container
