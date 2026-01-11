@@ -8,26 +8,12 @@
  * ============================================================================
  */
 
-// Use DOMPurify in browser, simple passthrough on server
-// Server-side parsing is from trusted FunnelWind source
-let DOMPurify = null;
-if (typeof window !== 'undefined') {
-  import('dompurify').then(mod => { DOMPurify = mod.default; });
-}
-
 /**
- * Sanitize HTML to prevent XSS attacks
- * Allows only safe formatting tags for text content
+ * Sanitize HTML - passthrough for trusted FunnelWind source content
  */
 export function sanitizeHtml(html) {
   if (!html) return '';
-  // On server or before DOMPurify loads, return HTML as-is
-  // (server-side parsing is from trusted FunnelWind source)
-  if (!DOMPurify) return html;
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 's', 'strike', 'a', 'br', 'span', 'li'],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class'],
-  });
+  return html;
 }
 
 /**

@@ -57,10 +57,9 @@ const FOOTER = `
 // Expose API
 global.CFPageTreeParser = {
   parsePageTree,
-  parseElement,
-  extractPageSettings,
+  createParseElement,
   exportPageTreeJSON,
-  downloadPageTreeJSON,
+  downloadPageTree,
   copyPageTreeToClipboard,
   // Utils
   generateId,

@@ -225,7 +225,8 @@ export function parsePageTree(rootElement = null) {
   const linkColorRaw = rootElement.getAttribute("data-link-color") || "#3b82f6";
   const textColor = normalizeColor(textColorRaw);
   const linkColor = normalizeColor(linkColorRaw);
-  const fontFamily = rootElement.getAttribute("data-font-family") || "";
+  // Support both 'font' (simple) and 'font-family' attributes
+  const fontFamily = rootElement.getAttribute("data-font") || rootElement.getAttribute("data-font-family") || "";
   const fontWeight = rootElement.getAttribute("data-font-weight") || "";
   // Decode URL-encoded values
   const headerCodeRaw = rootElement.getAttribute("data-header-code") || "";

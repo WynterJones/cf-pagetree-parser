@@ -30,11 +30,12 @@ function sanitizeHtml(html) {
  * ============================================================================
  */
 
-// Use DOMPurify in browser, simple passthrough on server
-// Server-side parsing is from trusted FunnelWind source
-let DOMPurify = null;
-if (typeof window !== 'undefined') {
-  import('dompurify').then(mod => { DOMPurify = mod.default; });
+/**
+ * Sanitize HTML - passthrough for trusted FunnelWind source content
+ */
+function sanitizeHtml(html) {
+  if (!html) return '';
+  return html;
 }
 
 /**
@@ -1621,6 +1622,9 @@ function parseTextElement(
   const id = generateId();
   const contentEditableId = generateId();
 
+  // Get element-id for scroll-to/show-hide targeting
+  const elementId = element.getAttribute('id') || element.getAttribute('data-element-id');
+
   const wrapperStyles = parseInlineStyle(element.getAttribute("style") || "");
   const spacing = parseSpacing(wrapperStyles);
 
@@ -1715,6 +1719,7 @@ function parseTextElement(
     parentId,
     fractionalIndex: generateFractionalIndex(index),
     attrs: {
+      ...(elementId ? { id: elementId } : {}),
       style: {},
       ...animationAttrs,
     },
@@ -4466,7 +4471,8 @@ function parsePageTree(rootElement = null) {
   const linkColorRaw = rootElement.getAttribute("data-link-color") || "#3b82f6";
   const textColor = normalizeColor(textColorRaw);
   const linkColor = normalizeColor(linkColorRaw);
-  const fontFamily = rootElement.getAttribute("data-font-family") || "";
+  // Support both 'font' (simple) and 'font-family' attributes
+  const fontFamily = rootElement.getAttribute("data-font") || rootElement.getAttribute("data-font-family") || "";
   const fontWeight = rootElement.getAttribute("data-font-weight") || "";
   // Decode URL-encoded values
   const headerCodeRaw = rootElement.getAttribute("data-header-code") || "";
@@ -4633,10 +4639,9 @@ async function copyPageTreeToClipboard(rootElement = null) {
 // Expose API
 global.CFPageTreeParser = {
   parsePageTree,
-  parseElement,
-  extractPageSettings,
+  createParseElement,
   exportPageTreeJSON,
-  downloadPageTreeJSON,
+  downloadPageTree,
   copyPageTreeToClipboard,
   // Utils
   generateId,

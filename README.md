@@ -65,6 +65,23 @@ The `dist/cf-pagetree-parser.js` bundle can be used in sandboxed extension conte
 - `parseBackground(styles)` - Parse background styles
 - `backgroundToParams(background)` - Convert background to CF params
 
+## Page Settings
+
+The parser extracts page-level settings from cf-page attributes:
+
+| Attribute | Description |
+|-----------|-------------|
+| `font` | Page font family (e.g., "Poppins"). Applied to body-level styles. |
+| `font-family` | Alias for `font` |
+| `text-color` | Default text color (default: #334155) |
+| `link-color` | Default link color (default: #3b82f6) |
+| `font-weight` | Default font weight |
+| `css` | Custom CSS (URL-encoded) |
+| `header-code` | Custom header HTML/scripts (URL-encoded) |
+| `footer-code` | Custom footer HTML/scripts (URL-encoded) |
+
+Font values are normalized to ClickFunnels format (e.g., `"Poppins", sans-serif`).
+
 ## Development
 
 ```bash
