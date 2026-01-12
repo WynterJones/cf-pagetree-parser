@@ -23,6 +23,8 @@ import {
   spacingToAttrsAndParams,
   parseBorderRadius,
   parseShadow,
+  shadowToParams,
+  resolveRadius,
   normalizeFontWeight,
   parseTextAlign,
 } from '../styles.js';
@@ -87,9 +89,10 @@ export function parseButton(element, parentId, index) {
   const paddingVertical = pyAttr ? parseValueWithUnit(pyAttr) : parseValueWithUnit(anchorStyles['padding-top'] || '16px');
 
   // Border and corners - data attributes first, then inline styles
+  // Use resolveRadius to handle preset names like "lg", "xl", etc.
   const roundedAttr = element.getAttribute('data-rounded');
   const borderRadius = roundedAttr
-    ? parseValueWithUnit(roundedAttr)
+    ? resolveRadius(roundedAttr)
     : parseBorderRadius(anchorStyles);
 
   const borderColorAttr = element.getAttribute('data-border-color');
@@ -139,9 +142,12 @@ export function parseButton(element, parentId, index) {
   const fullWidth = element.getAttribute('data-full-width') === 'true';
 
   // Build button selector - always include padding params
+  const hasBorder = borderWidth && borderWidth.value > 0;
   const buttonSelector = {
     attrs: {
       style: {},
+      'data-skip-shadow-settings': shadow ? 'false' : 'true',
+      'data-skip-corners-settings': borderRadius ? 'false' : 'true',
     },
     params: {
       '--style-padding-horizontal': paddingHorizontal ? paddingHorizontal.value : 32,
@@ -152,6 +158,7 @@ export function parseButton(element, parentId, index) {
       '--style-border-color': borderColor || 'transparent',
       '--style-border-width': borderWidth ? borderWidth.value : 0,
       '--style-border-width--unit': borderWidth ? borderWidth.unit : 'px',
+      '--style-border-style': hasBorder ? 'solid' : 'none',
     },
   };
 
@@ -256,9 +263,9 @@ export function parseButton(element, parentId, index) {
     node.selectors['.elButton'].params['border-radius--unit'] = borderRadius.unit;
   }
 
-  // Apply shadow (button doesn't support shadow in CF, but keep for reference)
+  // Apply shadow
   if (shadow) {
-    // CF buttons don't have native shadow support
+    Object.assign(node.selectors['.elButton'].params, shadowToParams(shadow));
   }
 
   // Add subtext if present

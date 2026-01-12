@@ -11,6 +11,34 @@
 import { parseValueWithUnit, normalizeColor } from './utils.js';
 
 /**
+ * Shadow preset names to CSS values (matches cf-elements SHADOWS)
+ */
+export const SHADOW_NAMES = {
+  none: 'none',
+  sm: '0 1px 2px rgba(0,0,0,0.05)',
+  default: '0 1px 3px rgba(0,0,0,0.1)',
+  md: '0 4px 6px rgba(0,0,0,0.1)',
+  lg: '0 10px 15px rgba(0,0,0,0.1)',
+  xl: '0 20px 25px rgba(0,0,0,0.1)',
+  '2xl': '0 25px 50px rgba(0,0,0,0.25)',
+};
+
+/**
+ * Radius preset names to CSS values (matches cf-elements RADIUS)
+ */
+export const RADIUS_NAMES = {
+  none: '0',
+  sm: '4px',
+  default: '8px',
+  md: '12px',
+  lg: '16px',
+  xl: '20px',
+  '2xl': '24px',
+  '3xl': '32px',
+  full: '9999px',
+};
+
+/**
  * Shadow presets mapping (from inline shadow to CF params)
  */
 export const SHADOW_PRESETS = {
@@ -37,11 +65,20 @@ export const SHADOW_PRESETS = {
 
 /**
  * Parse box-shadow value to CF params
+ * Handles both preset names (sm, md, lg, xl) and CSS shadow strings
  */
 export function parseShadow(shadowValue) {
   if (!shadowValue || shadowValue === 'none') return null;
 
-  // Check if it matches a preset
+  // Check if it's a preset name first (e.g., "sm", "lg", "xl")
+  if (SHADOW_NAMES[shadowValue]) {
+    const resolvedShadow = SHADOW_NAMES[shadowValue];
+    if (resolvedShadow === 'none') return null;
+    // Now parse the resolved CSS value
+    return parseShadow(resolvedShadow);
+  }
+
+  // Check if it matches a preset CSS value
   const normalized = shadowValue.replace(/\s+/g, ' ').trim();
   if (SHADOW_PRESETS[normalized]) {
     return SHADOW_PRESETS[normalized];
@@ -282,6 +319,23 @@ export function parseBorderRadius(styles) {
     return parseValueWithUnit(styles['border-radius']);
   }
   return null;
+}
+
+/**
+ * Resolve radius value - handles both preset names (sm, md, lg) and CSS values
+ * Returns { value, unit } or null
+ */
+export function resolveRadius(radiusValue) {
+  if (!radiusValue || radiusValue === 'none') return { value: 0, unit: 'px' };
+
+  // Check if it's a preset name first (e.g., "sm", "lg", "xl")
+  if (RADIUS_NAMES[radiusValue]) {
+    const resolvedRadius = RADIUS_NAMES[radiusValue];
+    return parseValueWithUnit(resolvedRadius);
+  }
+
+  // Otherwise parse as a CSS value
+  return parseValueWithUnit(radiusValue);
 }
 
 /**

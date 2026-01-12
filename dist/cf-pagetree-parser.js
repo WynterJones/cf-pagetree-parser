@@ -421,6 +421,34 @@ function parseHtmlToTextNodes(html, defaultLinkColor = null) {
  */
 
 /**
+ * Shadow preset names to CSS values (matches cf-elements SHADOWS)
+ */
+const SHADOW_NAMES = {
+  none: 'none',
+  sm: '0 1px 2px rgba(0,0,0,0.05)',
+  default: '0 1px 3px rgba(0,0,0,0.1)',
+  md: '0 4px 6px rgba(0,0,0,0.1)',
+  lg: '0 10px 15px rgba(0,0,0,0.1)',
+  xl: '0 20px 25px rgba(0,0,0,0.1)',
+  '2xl': '0 25px 50px rgba(0,0,0,0.25)',
+};
+
+/**
+ * Radius preset names to CSS values (matches cf-elements RADIUS)
+ */
+const RADIUS_NAMES = {
+  none: '0',
+  sm: '4px',
+  default: '8px',
+  md: '12px',
+  lg: '16px',
+  xl: '20px',
+  '2xl': '24px',
+  '3xl': '32px',
+  full: '9999px',
+};
+
+/**
  * Shadow presets mapping (from inline shadow to CF params)
  */
 const SHADOW_PRESETS = {
@@ -447,11 +475,20 @@ const SHADOW_PRESETS = {
 
 /**
  * Parse box-shadow value to CF params
+ * Handles both preset names (sm, md, lg, xl) and CSS shadow strings
  */
 function parseShadow(shadowValue) {
   if (!shadowValue || shadowValue === 'none') return null;
 
-  // Check if it matches a preset
+  // Check if it's a preset name first (e.g., "sm", "lg", "xl")
+  if (SHADOW_NAMES[shadowValue]) {
+    const resolvedShadow = SHADOW_NAMES[shadowValue];
+    if (resolvedShadow === 'none') return null;
+    // Now parse the resolved CSS value
+    return parseShadow(resolvedShadow);
+  }
+
+  // Check if it matches a preset CSS value
   const normalized = shadowValue.replace(/\s+/g, ' ').trim();
   if (SHADOW_PRESETS[normalized]) {
     return SHADOW_PRESETS[normalized];
@@ -692,6 +729,23 @@ function parseBorderRadius(styles) {
     return parseValueWithUnit(styles['border-radius']);
   }
   return null;
+}
+
+/**
+ * Resolve radius value - handles both preset names (sm, md, lg) and CSS values
+ * Returns { value, unit } or null
+ */
+function resolveRadius(radiusValue) {
+  if (!radiusValue || radiusValue === 'none') return { value: 0, unit: 'px' };
+
+  // Check if it's a preset name first (e.g., "sm", "lg", "xl")
+  if (RADIUS_NAMES[radiusValue]) {
+    const resolvedRadius = RADIUS_NAMES[radiusValue];
+    return parseValueWithUnit(resolvedRadius);
+  }
+
+  // Otherwise parse as a CSS value
+  return parseValueWithUnit(radiusValue);
 }
 
 /**
@@ -1928,9 +1982,10 @@ function parseButton(element, parentId, index) {
   const paddingVertical = pyAttr ? parseValueWithUnit(pyAttr) : parseValueWithUnit(anchorStyles['padding-top'] || '16px');
 
   // Border and corners - data attributes first, then inline styles
+  // Use resolveRadius to handle preset names like "lg", "xl", etc.
   const roundedAttr = element.getAttribute('data-rounded');
   const borderRadius = roundedAttr
-    ? parseValueWithUnit(roundedAttr)
+    ? resolveRadius(roundedAttr)
     : parseBorderRadius(anchorStyles);
 
   const borderColorAttr = element.getAttribute('data-border-color');
@@ -1980,9 +2035,12 @@ function parseButton(element, parentId, index) {
   const fullWidth = element.getAttribute('data-full-width') === 'true';
 
   // Build button selector - always include padding params
+  const hasBorder = borderWidth && borderWidth.value > 0;
   const buttonSelector = {
     attrs: {
       style: {},
+      'data-skip-shadow-settings': shadow ? 'false' : 'true',
+      'data-skip-corners-settings': borderRadius ? 'false' : 'true',
     },
     params: {
       '--style-padding-horizontal': paddingHorizontal ? paddingHorizontal.value : 32,
@@ -1993,6 +2051,7 @@ function parseButton(element, parentId, index) {
       '--style-border-color': borderColor || 'transparent',
       '--style-border-width': borderWidth ? borderWidth.value : 0,
       '--style-border-width--unit': borderWidth ? borderWidth.unit : 'px',
+      '--style-border-style': hasBorder ? 'solid' : 'none',
     },
   };
 
@@ -2097,9 +2156,9 @@ function parseButton(element, parentId, index) {
     node.selectors['.elButton'].params['border-radius--unit'] = borderRadius.unit;
   }
 
-  // Apply shadow (button doesn't support shadow in CF, but keep for reference)
+  // Apply shadow
   if (shadow) {
-    // CF buttons don't have native shadow support
+    Object.assign(node.selectors['.elButton'].params, shadowToParams(shadow));
   }
 
   // Add subtext if present
@@ -3849,19 +3908,12 @@ function parseCountdown(element, parentId, index) {
   const borderRadius = parseBorderRadius(containerStyles);
 
   // Parse shadow from inline styles or data attribute
+  // parseShadow() now handles preset names like "sm", "lg", "xl" automatically
   let shadow = parseShadow(containerStyles['box-shadow']);
   if (!shadow) {
     const shadowAttr = element.getAttribute('data-shadow');
     if (shadowAttr) {
-      // Resolve preset names to actual shadow values
-      const SHADOW_VALUES = {
-        'sm': '0 1px 2px rgba(0,0,0,0.05)',
-        'md': '0 4px 6px rgba(0,0,0,0.1)',
-        'lg': '0 10px 15px rgba(0,0,0,0.1)',
-        'xl': '0 20px 25px rgba(0,0,0,0.1)',
-        '2xl': '0 25px 50px rgba(0,0,0,0.25)',
-      };
-      shadow = parseShadow(SHADOW_VALUES[shadowAttr] || shadowAttr);
+      shadow = parseShadow(shadowAttr);
     }
   }
 

@@ -308,19 +308,12 @@ export function parseCountdown(element, parentId, index) {
   const borderRadius = parseBorderRadius(containerStyles);
 
   // Parse shadow from inline styles or data attribute
+  // parseShadow() now handles preset names like "sm", "lg", "xl" automatically
   let shadow = parseShadow(containerStyles['box-shadow']);
   if (!shadow) {
     const shadowAttr = element.getAttribute('data-shadow');
     if (shadowAttr) {
-      // Resolve preset names to actual shadow values
-      const SHADOW_VALUES = {
-        'sm': '0 1px 2px rgba(0,0,0,0.05)',
-        'md': '0 4px 6px rgba(0,0,0,0.1)',
-        'lg': '0 10px 15px rgba(0,0,0,0.1)',
-        'xl': '0 20px 25px rgba(0,0,0,0.1)',
-        '2xl': '0 25px 50px rgba(0,0,0,0.25)',
-      };
-      shadow = parseShadow(SHADOW_VALUES[shadowAttr] || shadowAttr);
+      shadow = parseShadow(shadowAttr);
     }
   }
 

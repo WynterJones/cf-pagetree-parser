@@ -2,6 +2,8 @@
 
 Parse FunnelWind HTML to ClickFunnels PageTree JSON.
 
+**Requires [cf-elements](https://www.npmjs.com/package/cf-elements)** - This parser works on the rendered HTML output from cf-elements. The cf-elements package renders FunnelWind custom elements (like `<cf-section>`, `<cf-headline>`, `<cf-button>`) into the DOM structure that this parser reads.
+
 ## Installation
 
 ```bash
