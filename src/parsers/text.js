@@ -73,7 +73,12 @@ function parseTextElement(
     ? parseFontFamily(fontAttr)
     : parseFontFamily(textStyles["font-family"]);
 
-  // Get color: element data-color > inline style > page color > default
+  // Get color with proper inheritance chain:
+  // 1. Element's own data-color attribute
+  // 2. Inline style color
+  // 3. Walk up parent containers checking for data-color (cf-flex, cf-col, cf-row, cf-section)
+  // 4. cf-page text-color attribute
+  // 5. Default fallback
   const colorAttr = element.getAttribute("data-color");
   let color;
   if (colorAttr) {
@@ -81,10 +86,33 @@ function parseTextElement(
   } else if (textStyles.color) {
     color = normalizeColor(textStyles.color);
   } else {
-    // Fall back to page-level color from ContentNode
-    const contentNode = element.closest('[data-type="ContentNode"]');
-    const pageColor = contentNode?.getAttribute("data-color") || contentNode?.getAttribute("data-text-color");
-    color = pageColor ? normalizeColor(pageColor) : "#000000";
+    // Walk up the DOM tree checking for data-color on parent containers
+    // Check cf-flex, cf-col, cf-row, cf-section in order (closest first)
+    const containerSelectors = [
+      '[data-type="FlexContainer/V1"]',
+      '[data-type="ColContainer/V1"]',
+      '[data-type="RowContainer/V1"]',
+      '[data-type="SectionContainer/V1"]',
+    ];
+
+    let inheritedColor = null;
+    for (const selector of containerSelectors) {
+      const parent = element.closest(selector);
+      const parentColor = parent?.getAttribute("data-color");
+      if (parentColor) {
+        inheritedColor = normalizeColor(parentColor);
+        break;
+      }
+    }
+
+    if (inheritedColor) {
+      color = inheritedColor;
+    } else {
+      // Fall back to page-level color from ContentNode
+      const contentNode = element.closest('[data-type="ContentNode"]');
+      const pageColor = contentNode?.getAttribute("data-color") || contentNode?.getAttribute("data-text-color");
+      color = pageColor ? normalizeColor(pageColor) : "#000000";
+    }
   }
 
   const alignAttr = element.getAttribute("data-align");

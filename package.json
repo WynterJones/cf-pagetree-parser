@@ -1,6 +1,6 @@
 {
   "name": "cf-pagetree-parser",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Parse FunnelWind HTML to ClickFunnels PageTree JSON",
   "main": "src/index.js",
   "type": "module",
